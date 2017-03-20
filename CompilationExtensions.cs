@@ -24,8 +24,7 @@ namespace csx
             }
         }
     }
-}
-public class ReferencedAssembly 
+    public class ReferencedAssembly 
 {
     public ReferencedAssembly(string path, AssemblyIdentity assemblyIdentity)
     {
@@ -34,4 +33,5 @@ public class ReferencedAssembly
     }
     public string Path {get; private set;}
     public AssemblyIdentity Identity {get; private set;}
+}
 }

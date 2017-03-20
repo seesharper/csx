@@ -18,11 +18,9 @@ namespace csx
     class Program
     {
         static void Main(string[] args)
-        {            
+        {                                                                      
             var interactiveAssemblyLoader = new InteractiveAssemblyLoader(); 
-            
-            
-            
+                                    
             string pathToScript = args[0];
                         
             SourceText encodedSourceText = null;
@@ -116,10 +114,11 @@ namespace csx
     public class NuGetMetadataResolver : MetadataReferenceResolver
     {
         private MetadataReferenceResolver resolver;
+        private Nuget nuget = new Nuget();
+
         public NuGetMetadataResolver(MetadataReferenceResolver resolver)
         {
-            this.resolver = resolver;
-        
+            this.resolver = resolver;        
         }
         
         public override bool Equals(object other)
@@ -129,7 +128,7 @@ namespace csx
 
         public override int GetHashCode()
         {
-            return 0;
+            return resolver.GetHashCode();
         }
 
          public override bool ResolveMissingAssemblies
@@ -145,25 +144,26 @@ namespace csx
             return this.resolver.ResolveMissingAssembly(definition, referenceIdentity);
          }
 
-        // protected override PortableExecutableReference ResolveMissingAssembly(MetadataReference definition, AssemblyIdentity referenceIdentity)
-        // {
-        //     return this.resolver.ResolveMissingAssemblies = 
-        // }
-
         public override ImmutableArray<PortableExecutableReference> ResolveReference(string reference, string baseFilePath, MetadataReferenceProperties properties)
         {
-            if (reference.Contains("nuget"))            
+            
+            if (reference.Contains("nuget"))
             {
-                
-                var metadataReference =  PortableExecutableReference.CreateFromFile(@"C:\Github\csx\LightInject.5.0.2\lib\netstandard1.6\LightInject.dll");
-                
-                var array = ImmutableArray<PortableExecutableReference>.Empty.Add(metadataReference);
+                var array = ImmutableArray<PortableExecutableReference>.Empty;
+                var files = nuget.Install(reference);
+                foreach (var file in files)
+                {
+                    var metadataReference = PortableExecutableReference.CreateFromFile(file);
+                    array = array.Add(metadataReference);
+                }
+                                
                 return array;            
             }
 
             var result =  this.resolver.ResolveReference(reference,baseFilePath,properties);
             return result;
         }
+
 
 
     }

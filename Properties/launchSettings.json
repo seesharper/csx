@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "csx": {
+      "commandName": "Project",
+      "commandLineArgs": "samplescript.csx"
+    }
+  }
+}

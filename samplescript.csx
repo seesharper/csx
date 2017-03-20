@@ -1,4 +1,4 @@
-#r "nuget:LightInject"
+#r "nuget:LightInject/5.0.2"
 
 using System;
 using LightInject;
