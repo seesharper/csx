@@ -38,6 +38,7 @@ namespace csx
 
             // Get the Compilation that gives us full access to the Roslyn Scriping API
             var compilation = script.GetCompilation();
+            
 
             SyntaxTree syntaxTree = compilation.SyntaxTrees.First();
 

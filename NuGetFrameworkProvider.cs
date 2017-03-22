@@ -32,6 +32,8 @@ public class NugetFrameworkProvider : INuGetFrameworkProvider
 
         private static string GetFrameworkNameFromAssembly()
         {
+            var entryAssembly = Assembly.GetEntryAssembly();
+
             return Assembly.GetEntryAssembly().GetCustomAttributes()
                             .OfType<System.Runtime.Versioning.TargetFrameworkAttribute>()
                             .Select(x => x.FrameworkName)

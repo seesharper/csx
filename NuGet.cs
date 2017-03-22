@@ -40,6 +40,11 @@ namespace csx
         {
 
             PackageIdentity packageIdentity = ParseNugetReference(nuGetReference);
+            if (packageIdentity == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
 
             log.Info($"Installing package {packageIdentity.Id}, Version {packageIdentity.Version}");
 
@@ -69,9 +74,13 @@ namespace csx
         {
             var regex = new Regex(@":(.+)\/(.+)");
             var match = regex.Match(nuGetReference);
-            var packageName = match.Groups[1].Value;
-            var version = match.Groups[2].Value;
-            return new PackageIdentity(packageName,NuGetVersion.Parse(version));
+            if (match.Success)
+            {
+                var packageName = match.Groups[1].Value;
+                var version = match.Groups[2].Value;
+                return new PackageIdentity(packageName, NuGetVersion.Parse(version));
+            }
+            return null;
         }
 
 
@@ -85,7 +94,7 @@ namespace csx
 
         private static IEnumerable<PackageSource> GetPackageSources()
         {
-            var defaultSettings = Settings.LoadDefaultSettings(".");
+            var defaultSettings = Settings.LoadDefaultSettings(Directory.GetCurrentDirectory());
             PackageSourceProvider packageSourceProvider = new PackageSourceProvider(defaultSettings);
             var packageSources = packageSourceProvider.LoadPackageSources().Where(ps => ps.IsEnabled);
             log.Info("Package sources;");
