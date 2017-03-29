@@ -104,9 +104,10 @@ namespace csx
                         var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
                         var submissionStates = new object[2];
                         submissionStates[0] = null;
-                        method.Invoke(null, new[] { submissionStates });
+                        var r = method.Invoke(null, new[] { submissionStates });
                     }                             
                 }
+                Console.ReadKey();
             }            
         }            
     }

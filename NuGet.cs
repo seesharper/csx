@@ -63,7 +63,14 @@ namespace csx
             PackageArchiveReader packageArchiveReader = new PackageArchiveReader(Path.Combine(installPath, packageFileName));
             var supportedFrameworks = packageArchiveReader.GetSupportedFrameworks();
             FrameworkReducer reducer = new FrameworkReducer();
+            //Fallback framework
+
             var nearest = reducer.GetNearest(GetFramework(), supportedFrameworks);
+            if (nearest == null)
+            {
+                nearest = supportedFrameworks.ToArray()[1];
+            }
+
 
             var frameworkSpecificGroup = packageArchiveReader.GetLibItems().SingleOrDefault(i => i.TargetFramework == nearest);
             var files = frameworkSpecificGroup.Items.Select(i => i.ToLower()).Where(i => i.EndsWith("dll") && !i.EndsWith("resources.dll"));
