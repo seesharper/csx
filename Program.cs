@@ -2,8 +2,6 @@
 using System.Text;
 using System.Reflection;
 using System.Linq;
-using System.Runtime.Loader;
-using System.Collections.Immutable;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
@@ -15,6 +13,8 @@ using Microsoft.CodeAnalysis.Scripting.Hosting;
 
 namespace csx
 {
+    using Dotnet.Script.NuGetMetadataResolver;
+
     class Program
     {
         static void Main(string[] args)
@@ -22,7 +22,8 @@ namespace csx
             var interactiveAssemblyLoader = new InteractiveAssemblyLoader(); 
                                     
             string pathToScript = args[0];
-                        
+            string rootFolder = Path.GetDirectoryName(Path.GetFullPath(pathToScript));
+            
             SourceText encodedSourceText = null;
             string codeAsPlainText = null;            
             using(var fileStream = new FileStream(pathToScript, FileMode.Open))
@@ -32,8 +33,10 @@ namespace csx
                 codeAsPlainText = encodedSourceText.ToString();        
             }
 
-            var scriptOptions = ScriptOptions.Default.WithFilePath(pathToScript);  
-            scriptOptions = scriptOptions.WithMetadataResolver(new NuGetMetadataResolver(scriptOptions.MetadataResolver));
+            var scriptOptions = ScriptOptions.Default.WithFilePath(pathToScript);
+            var resolver = NuGetMetadataReferenceResolver.Create(scriptOptions.MetadataResolver, NugetFrameworkProvider.GetFrameworkNameFromAssembly(), rootFolder);
+            scriptOptions = scriptOptions.WithMetadataResolver(resolver);
+            //scriptOptions = scriptOptions.WithMetadataResolver(new NuGetMetadataResolver(scriptOptions.MetadataResolver));
             var script = CSharpScript.Create(codeAsPlainText, scriptOptions, null, interactiveAssemblyLoader);
 
             // Get the Compilation that gives us full access to the Roslyn Scriping API
@@ -69,20 +72,15 @@ namespace csx
                     var referencedAssemblies =
                         // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/Core/Portable/ReferenceManager/CommonReferenceManager.State.cs#L34
                         referenceManager.Invoke<IEnumerable<KeyValuePair<MetadataReference, IAssemblySymbol>>>("GetReferencedAssemblies", BindingFlags.NonPublic);
-
-                   
-                    
-
-                    
-                    var refs = compilation.References;    
-                    
+                                        
                     foreach (var referencedAssembly in referencedAssemblies)
                     {
                         var path = (referencedAssembly.Key as PortableExecutableReference)?.FilePath;
                         if (path != null)
                         {
-                            interactiveAssemblyLoader.RegisterDependency(referencedAssembly.Value.Identity, path);
-                        }
+                            Console.WriteLine(path);
+                            interactiveAssemblyLoader.RegisterDependency(referencedAssembly.Value.Identity, path);                            
+                        }                    
                     }  
 
 
@@ -95,17 +93,26 @@ namespace csx
                         peStream.Position = 0;
                         pdbStream.Position = 0;
                         var assembly =
-                        
-                        interactiveAssemblyLoader.Invoke<Stream, Stream, Assembly>(
-                            "LoadAssemblyFromStream", BindingFlags.NonPublic,
-                            peStream, pdbStream);
+
+                            interactiveAssemblyLoader.Invoke<Stream, Stream, Assembly>(
+                                "LoadAssemblyFromStream", BindingFlags.NonPublic,
+                                peStream, pdbStream);
 
                         var type = assembly.GetType("Submission#0");
                         var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
                         var submissionStates = new object[2];
                         submissionStates[0] = null;
-                        var r = method.Invoke(null, new[] { submissionStates });
-                    }                             
+                        var result = method.Invoke(null, new[] {submissionStates});
+                        Console.WriteLine(result);
+                    }
+                    else
+                    {
+                        foreach (var diagnostic in emitResult.Diagnostics)
+                        {
+                            Console.WriteLine(diagnostic);
+                        }
+                    }
+
                 }
                 Console.ReadKey();
             }            
@@ -113,60 +120,5 @@ namespace csx
     }
 
 
-    public class NuGetMetadataResolver : MetadataReferenceResolver
-    {
-        private MetadataReferenceResolver resolver;
-        private Nuget nuget = new Nuget();
-
-        public NuGetMetadataResolver(MetadataReferenceResolver resolver)
-        {
-            this.resolver = resolver;        
-        }
-        
-        public override bool Equals(object other)
-        {
-            return other.Equals(this);
-        }
-
-        public override int GetHashCode()
-        {
-            return resolver.GetHashCode();
-        }
-
-         public override bool ResolveMissingAssemblies
-         {
-             get
-             {
-                return this.resolver.ResolveMissingAssemblies;       
-             }
-         }
-
-         public override PortableExecutableReference ResolveMissingAssembly(MetadataReference definition, AssemblyIdentity referenceIdentity)
-         {
-            return this.resolver.ResolveMissingAssembly(definition, referenceIdentity);
-         }
-
-        public override ImmutableArray<PortableExecutableReference> ResolveReference(string reference, string baseFilePath, MetadataReferenceProperties properties)
-        {
-            
-            if (reference.Contains("nuget"))
-            {
-                var array = ImmutableArray<PortableExecutableReference>.Empty;
-                var files = nuget.Install(reference);
-                foreach (var file in files)
-                {
-                    var metadataReference = PortableExecutableReference.CreateFromFile(file);
-                    array = array.Add(metadataReference);
-                }
-                                
-                return array;            
-            }
-
-            var result =  this.resolver.ResolveReference(reference,baseFilePath,properties);
-            return result;
-        }
-
-
-
-    }
+  
 }
