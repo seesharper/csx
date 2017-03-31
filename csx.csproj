@@ -5,7 +5,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dotnet.Script.NuGetMetadataResolver" Version="1.0.6" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.0.0-beta1-61531-01" />
+    <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
     <PackageReference Include="NuGet.Protocol.Core.v3" Version="4.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
