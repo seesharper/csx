@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Scripting.Hosting;
 
 namespace csx
 {
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using Dotnet.Script.NuGetMetadataResolver;
     using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
@@ -22,8 +23,7 @@ namespace csx
         {                                                                      
             var interactiveAssemblyLoader = new InteractiveAssemblyLoader();            
             string pathToScript = Path.GetFullPath(args[0]);
-            string rootFolder = Path.GetDirectoryName(pathToScript);
-
+            
 
             string codeAsPlainText = null;            
             using(var fileStream = new FileStream(pathToScript, FileMode.Open))
@@ -33,16 +33,10 @@ namespace csx
                 codeAsPlainText = encodedSourceText.ToString();
             }
 
-            var scriptOptions = ScriptOptions.Default.WithFilePath(pathToScript);
-            
-            var resolver = NuGetMetadataReferenceResolver.Create(scriptOptions.MetadataResolver, NugetFrameworkProvider.GetFrameworkNameFromAssembly(), rootFolder);
-            
-            scriptOptions = scriptOptions.WithMetadataResolver(resolver);
-            scriptOptions = scriptOptions.WithEmitDebugInformation(true);
-            scriptOptions = scriptOptions.WithFileEncoding(Encoding.UTF8);            
-            
+            var scriptOptions = CreateScriptOptions(pathToScript);
 
-            InteractiveScriptGlobals globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+
+            var globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
             foreach (var arg in args)
             {
                 globals.Args.Add(arg);
@@ -60,9 +54,40 @@ namespace csx
                 scriptOptions = scriptOptions.AddReferences(assembly);
             }
 
-            var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);
+            var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);            
             Console.WriteLine(script.RunAsync(globals, CancellationToken.None).Result);                       
-        }            
+        }
+
+        private static ScriptOptions CreateScriptOptions(string pathToScript)
+        {
+            string[] imports = {
+                "System",
+                "System.IO",
+                "System.Collections.Generic",
+                "System.Console",
+                "System.Diagnostics",
+                "System.Dynamic",
+                "System.Linq",
+                "System.Linq.Expressions",
+                "System.Text",
+                "System.Threading.Tasks"
+            };
+            
+            var scriptOptions = ScriptOptions.Default;
+            return scriptOptions
+                .WithEmitDebugInformation(true)
+                .WithFileEncoding(Encoding.UTF8)
+                .WithMetadataResolver(CreateNuGetMetadataResolver(pathToScript, scriptOptions))
+                .WithFilePath(pathToScript)
+                .WithImports(imports);
+        }
+
+        private static NuGetMetadataReferenceResolver CreateNuGetMetadataResolver(string pathToScript, ScriptOptions scriptOptions)
+        {
+            string rootFolder = Path.GetDirectoryName(pathToScript);
+            return NuGetMetadataReferenceResolver.Create(scriptOptions.MetadataResolver,
+                NugetFrameworkProvider.GetFrameworkNameFromAssembly(), rootFolder);
+        }
     }
 
 
