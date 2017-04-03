@@ -12,7 +12,7 @@ Execute(() => CreateNugetPackages(), "Creating NuGet packages");
 
 private void CreateNugetPackages()
 {			
-	Choco.Pack("csx.nuspec");
+	Choco.Pack("csx.nuspec", pathToBuildDirectory);
 	//NuGet.CreatePackage("csx.nuspec",pathToBuildDirectory);	
     string myDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     RoboCopy(pathToBuildDirectory, myDocumentsFolder, "*.nupkg");		

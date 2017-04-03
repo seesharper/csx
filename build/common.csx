@@ -13,9 +13,9 @@ private static string lastWriteOperation;
 
 public static class Choco
 {
-    public static void Pack(string pathToMetadata)
+    public static void Pack(string pathToMetadata, string outputDirectory)
     {
-        Command.Execute("choco.exe", $"pack {pathToMetadata}", ".");
+        Command.Execute("choco.exe", $"pack {pathToMetadata} -out={outputDirectory}", ".");
     }
 }
 
