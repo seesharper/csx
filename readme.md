@@ -47,9 +47,13 @@ As mentioned we need a custom MetadataReferenceResolver to handle NuGet package 
 
 
 
+Microsoft.CodeAnalysis.Nuget
+
+NuGetMetadataReferenceResolver 
 
 
 
+Dotnet.Script.NuGetMetadataResolver
 
 
 
