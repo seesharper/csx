@@ -16,6 +16,8 @@ namespace csx
     using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
     using Microsoft.DotNet.InternalAbstractions;
     using Microsoft.Extensions.DependencyModel;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Console;
 
     class Program
     {
@@ -84,9 +86,13 @@ namespace csx
 
         private static NuGetMetadataReferenceResolver CreateNuGetMetadataResolver(string pathToScript, ScriptOptions scriptOptions)
         {
+            var loggerFactory = new LoggerFactory();            
+            loggerFactory.AddProvider(
+                new ConsoleLoggerProvider(
+                    (text, logLevel) => logLevel >= LogLevel.Information, true));            
             string rootFolder = Path.GetDirectoryName(pathToScript);
             return NuGetMetadataReferenceResolver.Create(scriptOptions.MetadataResolver,
-                NugetFrameworkProvider.GetFrameworkNameFromAssembly(), rootFolder);
+                NugetFrameworkProvider.GetFrameworkNameFromAssembly(),loggerFactory, rootFolder);
         }
     }
 
