@@ -1,5 +1,17 @@
 ## csx
 
+A super simple C# script runner for .Net Core with debug and NuGet support.
+
+### Installing 
+
+```shell
+choco install csx --source https://www.nuget.org/api/v2 --pre	
+```
+
+
+
+
+
 
 
 ### Vision
