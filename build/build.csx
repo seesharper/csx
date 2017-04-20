@@ -2,7 +2,7 @@
 #load "common.csx"
 
 string pathToBuildDirectory = @"tmp/";
-private string version = "1.0.0-beta3";
+private string version = "1.0.0-beta2";
 
 WriteLine("csx version {0}" , version);
 
