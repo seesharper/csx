@@ -1,101 +1,59 @@
 ﻿using System;
-using System.Text;
-using System.Reflection;
-using System.Linq;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Text;
-using System.IO;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 
 namespace csx
 {
-    using System.Runtime.CompilerServices;
-    using System.Threading;
-    using Dotnet.Script.NuGetMetadataResolver;
-    using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
-    using Microsoft.DotNet.InternalAbstractions;
-    using Microsoft.Extensions.DependencyModel;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Console;
+    using Microsoft.Extensions.CommandLineUtils;
+
 
     class Program
     {
         static void Main(string[] args)
-        {                                                                      
-            var interactiveAssemblyLoader = new InteractiveAssemblyLoader();            
-            string pathToScript = Path.GetFullPath(args[0]);
-            
+        {
+            var cli = new CommandLineApplication();
+            cli.Description = "C# script runner for .Net Core with debug and NuGetCommand support";
+            cli.HelpOption("-? | -h | --help");
 
-            string codeAsPlainText = null;            
-            using(var fileStream = new FileStream(pathToScript, FileMode.Open))
+                       
+            cli.Command("init", config =>
             {
-                // We need to create a SourceText instance with an encoding
-                var encodedSourceText = SourceText.From(fileStream, Encoding.UTF8);
-                codeAsPlainText = encodedSourceText.ToString();
-            }
+                config.Description = "Creates a new script and the launch.json file needed to debug the script.";
+                var fileNameArgument = config.Argument("filename", "The script file name");
+                config.OnExecute(() =>
+                {
+                    var skaffolder = new Skaffolder();
+                    skaffolder.InitializerFolder(fileNameArgument.Value);
+                    return 0;
+                });
+            });
 
-            var scriptOptions = CreateScriptOptions(pathToScript);
+            var file = cli.Argument("script", "The path to the script to be executed");
 
-
-            var globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
-            foreach (var arg in args)
+            cli.OnExecute(() =>
             {
-                globals.Args.Add(arg);
-            }
+                if (string.IsNullOrWhiteSpace(file.Value) )
+                {
+                    cli.ShowHelp();
+                }
+                var scriptExecutor = CreateScriptExecutor();
+                scriptExecutor.Execute(file.Value);
+                Console.ReadKey();
+                return 0;
+            });
+           
 
-            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
-                x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
-
-            foreach (var inheritedAssemblyName in inheritedAssemblyNames)
-            {                
-                var assembly = Assembly.Load(inheritedAssemblyName);
-                scriptOptions = scriptOptions.AddReferences(assembly);
-            }
-
-            var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);            
-            Console.WriteLine(script.RunAsync(globals, CancellationToken.None).Result);                       
+            cli.Execute(args);
         }
 
-        private static ScriptOptions CreateScriptOptions(string pathToScript)
+        private static ScriptExecutor CreateScriptExecutor()
         {
-            string[] imports = {
-                "System",
-                "System.IO",
-                "System.Collections.Generic",
-                "System.Console",
-                "System.Diagnostics",
-                "System.Dynamic",
-                "System.Linq",
-                "System.Linq.Expressions",
-                "System.Text",
-                "System.Threading.Tasks"
-            };
-            
-            var scriptOptions = ScriptOptions.Default;
-            return scriptOptions
-                .WithEmitDebugInformation(true)
-                .WithFileEncoding(Encoding.UTF8)
-                .WithMetadataResolver(CreateNuGetMetadataResolver(pathToScript, scriptOptions))
-                .WithFilePath(pathToScript)
-                .WithImports(imports);
-        }
-
-        private static NuGetMetadataReferenceResolver CreateNuGetMetadataResolver(string pathToScript, ScriptOptions scriptOptions)
-        {
-            var loggerFactory = new LoggerFactory();            
+            var loggerFactory = new LoggerFactory();
             loggerFactory.AddProvider(
                 new ConsoleLoggerProvider(
-                    (text, logLevel) => logLevel >= LogLevel.Information, true));            
-            string rootFolder = Path.GetDirectoryName(pathToScript);
-            return NuGetMetadataReferenceResolver.Create(scriptOptions.MetadataResolver,
-                NugetFrameworkProvider.GetFrameworkNameFromAssembly(),loggerFactory, rootFolder);
+                    (text, logLevel) => logLevel >= LogLevel.Information, true));
+            return new ScriptExecutor(ScriptProjectProvider.Create(loggerFactory),loggerFactory);
+
         }
-    }
-
-
-  
+    }  
 }
