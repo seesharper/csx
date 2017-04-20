@@ -52,17 +52,17 @@
             //    globals.Args.Add(arg);
             //}
 
-            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
-                x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
+            //var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
+            //var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
+            //    x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
+            //    x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
+            //    x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
 
-            foreach (var inheritedAssemblyName in inheritedAssemblyNames)
-            {
-                var assembly = Assembly.Load(inheritedAssemblyName);
-                scriptOptions = scriptOptions.AddReferences(assembly);
-            }
+            //foreach (var inheritedAssemblyName in inheritedAssemblyNames)
+            //{
+            //    var assembly = Assembly.Load(inheritedAssemblyName);
+            //    scriptOptions = scriptOptions.AddReferences(assembly);
+            //}
 
             var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);
 
