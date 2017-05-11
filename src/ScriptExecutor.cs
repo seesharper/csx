@@ -56,7 +56,7 @@
 
             var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);
 
-            var diagnostics = script.GetCompilation().GetDiagnostics();
+            var diagnostics = script.GetCompilation().GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error);
             foreach (var diagnostic in diagnostics)
             {
                 logger.LogError(diagnostic.ToString());

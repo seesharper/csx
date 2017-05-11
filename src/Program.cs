@@ -38,8 +38,7 @@ namespace csx
                     cli.ShowHelp();
                 }
                 var scriptExecutor = CreateScriptExecutor();
-                scriptExecutor.Execute(file.Value);
-                Console.ReadKey();
+                scriptExecutor.Execute(file.Value);                
                 return 0;
             });
            
