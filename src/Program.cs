@@ -2,6 +2,7 @@
 
 namespace csx
 {
+    using Dotnet.Script.NuGetMetadataResolver;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Console;
     using Microsoft.Extensions.CommandLineUtils;

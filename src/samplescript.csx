@@ -1,6 +1,5 @@
 #! "netcoreapp1.0"
-#r "nuget:AutoMapper,6.0.0"
-#r "nuget:LightInject,5.0.2"
+#r "nuget:NetStandard.Library,1.6.0"
 //#load "anotherscript.csx"
 
 
@@ -8,16 +7,16 @@
 using System;
 using System.Text.RegularExpressions;
 using System.Linq;
-using AutoMapper;
-using LightInject;
+//using AutoMapper;
+//using LightInject;
 
 
-Console.WriteLine("hello!");
+Console.WritexLine("hello!");
 
 // Call a method in 'anotherscript';
 //Test();
 
 
-Console.WriteLine(typeof(MapperConfiguration));
+//Console.WriteLine(typeof(MapperConfiguration));
 
 

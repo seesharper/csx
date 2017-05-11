@@ -52,22 +52,15 @@
             //    globals.Args.Add(arg);
             //}
 
-            //var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            //var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
-            //    x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
-            //    x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
-            //    x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
-
-            //foreach (var inheritedAssemblyName in inheritedAssemblyNames)
-            //{
-            //    var assembly = Assembly.Load(inheritedAssemblyName);
-            //    scriptOptions = scriptOptions.AddReferences(assembly);
-            //}
+            
 
             var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);
 
-            var diag = script.GetCompilation().GetDiagnostics();
-            Console.WriteLine(script.RunAsync(globals, CancellationToken.None).Result);
+            var diagnostics = script.GetCompilation().GetDiagnostics();
+            foreach (var diagnostic in diagnostics)
+            {
+                logger.LogError(diagnostic.ToString());
+            }            
         }
 
 
@@ -92,15 +85,15 @@
                 .WithEmitDebugInformation(true)
                 .WithFileEncoding(Encoding.UTF8)
                 .WithFilePath(pathToScript)
-                .WithImports(imports)
+                .WithImports(imports)                
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default));
         }
 
         private ScriptOptions AddMetadataReferences(ScriptOptions options, string pathToScript)
         {
             var targetDirectory = Path.GetDirectoryName(pathToScript);
-            string pathToProjectJson = scriptProjectProvider.CreateProject(targetDirectory);
-
+            string pathToProjectJson = scriptProjectProvider.CreateProject(targetDirectory).PathToProjectJson;
+            
             List<string> runtimeDependencies = new List<string>();
             var context = ProjectContext.CreateContextForEachTarget(pathToProjectJson);
             var exporter = context.First().CreateExporter("Release");
