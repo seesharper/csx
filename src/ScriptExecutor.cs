@@ -52,15 +52,27 @@
             //    globals.Args.Add(arg);
             //}
 
-            
 
+            logger.LogInformation("Creating script");
             var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);
 
             var diagnostics = script.GetCompilation().GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error);
             foreach (var diagnostic in diagnostics)
             {
                 logger.LogError(diagnostic.ToString());
-            }            
+            }
+            try
+            {
+                logger.LogInformation("Executing script");
+                var result = script.RunAsync(globals, CancellationToken.None).Result;
+            }
+            catch (AggregateException e)
+            {
+                foreach (var innerException in e.InnerExceptions)
+                {
+                    logger.LogError(innerException.ToString());
+                }
+            }                        
         }
 
 

@@ -36,6 +36,7 @@ namespace csx
                 if (string.IsNullOrWhiteSpace(file.Value) )
                 {
                     cli.ShowHelp();
+                    return 0;
                 }
                 var scriptExecutor = CreateScriptExecutor();
                 scriptExecutor.Execute(file.Value);                
