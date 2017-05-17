@@ -34,7 +34,10 @@
         public void Execute(string pathToScript)
         {
             var interactiveAssemblyLoader = new InteractiveAssemblyLoader();
-            
+            if (!Path.IsPathRooted(pathToScript))
+            {
+                pathToScript = Path.GetFullPath(pathToScript);
+            }            
             string codeAsPlainText = null;
             using (var fileStream = new FileStream(pathToScript, FileMode.Open))
             {
