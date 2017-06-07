@@ -1,11 +1,11 @@
-{
+﻿{
     "version": "0.2.0",
     "configurations": [
         {
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",                                    
-            "program": "C:\Github\csx\src\bin\Debug\netcoreapp1.1\csx.exe",            
+            "program": "PATH_TO_CSX",            
             "args": ["${file}"],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,

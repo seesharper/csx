@@ -3,7 +3,7 @@
   <metadata>
     <id>csx</id>
     <title>csx</title>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-beta8</version>
     <authors>Bernhard Richter</authors>
     <owners>Bernhard Richter</owners>
     <summary>C# Script Runner for .Net Core.</summary>

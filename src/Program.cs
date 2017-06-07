@@ -2,6 +2,7 @@
 
 namespace csx
 {
+    using System.Reflection;
     using Dotnet.Script.NuGetMetadataResolver;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Console;
@@ -11,15 +12,15 @@ namespace csx
     class Program
     {
         static void Main(string[] args)
-        {
+        {            
             var cli = new CommandLineApplication();
             cli.Description = "C# script runner for .Net Core with debug and NuGetCommand support";
             cli.HelpOption("-? | -h | --help");
 
                        
-            cli.Command("init", config =>
+            cli.Command("vscode", config =>
             {
-                config.Description = "Creates a new script and the launch.json file needed to debug the script.";
+                config.Description = "Creates the launch.json file and the tasks.json file needed to launch and debug the script.";
                 var fileNameArgument = config.Argument("filename", "The script file name");
                 config.OnExecute(() =>
                 {
