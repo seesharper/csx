@@ -10,11 +10,13 @@
     <None Remove="Templates\tasks.json.template" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Templates\omnisharp.json.template" />
+    <EmbeddedResource Include="Templates\script.csx.template" />
     <EmbeddedResource Include="Templates\launch.json.template" />
     <EmbeddedResource Include="Templates\tasks.json.template" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dotnet.Script.NuGetMetadataResolver" Version="2.0.1" />
+    <PackageReference Include="Dotnet.Script.NuGetMetadataResolver" Version="2.0.3" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.0.0-beta1-61618-06" />
     <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.500-preview2-1-003177" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-1-003177" />
@@ -22,7 +24,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.1" />
-    <PackageReference Include="NuGet.Protocol.Core.v3" Version="4.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 </Project>

@@ -1,8 +1,5 @@
-﻿using System;
-
-namespace csx
+﻿namespace csx
 {
-    using System.Reflection;
     using Dotnet.Script.NuGetMetadataResolver;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Console;
@@ -16,19 +13,36 @@ namespace csx
             var cli = new CommandLineApplication();
             cli.Description = "C# script runner for .Net Core with debug and NuGetCommand support";
             cli.HelpOption("-? | -h | --help");
-
+            
                        
             cli.Command("vscode", config =>
             {
-                config.Description = "Creates the launch.json file and the tasks.json file needed to launch and debug the script.";
-                var fileNameArgument = config.Argument("filename", "The script file name");
+                config.Description = "Creates the launch.json file and the tasks.json file needed to launch and debug the script.";                
                 config.OnExecute(() =>
                 {
                     var skaffolder = new Skaffolder();
-                    skaffolder.InitializerFolder(fileNameArgument.Value);
+                    skaffolder.InitializerFolder();
                     return 0;
                 });
             });
+
+            cli.Command("new", config =>
+            {
+                config.Description = "Creates a new script file";
+                var fileNameArgument = config.Argument("filename", "The script file name");                
+                config.OnExecute(() =>
+                {                    
+                    var skaffolder = new Skaffolder();
+                    if (fileNameArgument.Value == null)
+                    {
+                        config.ShowHelp();
+                        return 0;
+                    }
+                    skaffolder.CreateNewScriptFile(fileNameArgument.Value);
+                    return 0;
+                });
+            });
+
 
             var file = cli.Argument("script", "The path to the script to be executed");
 

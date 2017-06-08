@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
     using System.Threading;
     using Dotnet.Script.NuGetMetadataResolver;
@@ -14,11 +13,8 @@
     using Microsoft.CodeAnalysis.Scripting;
     using Microsoft.CodeAnalysis.Scripting.Hosting;
     using Microsoft.CodeAnalysis.Text;
-    using Microsoft.DotNet.InternalAbstractions;
     using Microsoft.DotNet.ProjectModel;
-    using Microsoft.Extensions.DependencyModel;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Logging.Console;
 
     public class ScriptExecutor
     {

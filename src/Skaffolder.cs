@@ -3,11 +3,10 @@
     using System;
     using System.IO;
     using System.Reflection;
-    using System.Resources;
 
     public class Skaffolder
     {
-        public void InitializerFolder(string pathToScript)
+        public void InitializerFolder()
         {            
             string currentDirectory = Directory.GetCurrentDirectory();
             string vsCodeDirectory = Path.Combine(currentDirectory, ".vscode");
@@ -20,7 +19,7 @@
             if (!File.Exists(pathToLaunchFile))
             {
                 string baseDirectory = Path.GetDirectoryName(new Uri(typeof(Skaffolder).GetTypeInfo().Assembly.CodeBase).LocalPath);
-                string csxPath = Path.Combine(baseDirectory, "csx.exe");
+                string csxPath = Path.Combine(baseDirectory, "csx.exe").Replace(@"\","/");
                 string lauchFileTemplate = ReadResourceFile("launch.json.template");
                 string launchFileContent = lauchFileTemplate.Replace("PATH_TO_CSX", csxPath);
                 WriteFile(pathToLaunchFile, launchFileContent);
@@ -31,6 +30,24 @@
             {
                 string taskFileTemplate = ReadResourceFile("tasks.json.template");
                 WriteFile(pathToTasksFile, taskFileTemplate);
+            }
+
+            string pathToOmniSharpJson = Path.Combine(currentDirectory, "omnisharp.json");
+            if (!File.Exists(pathToOmniSharpJson))
+            {
+                var omniSharpFileTemplate = ReadResourceFile("omnisharp.json.template");
+                WriteFile(pathToOmniSharpJson, omniSharpFileTemplate);
+            }
+        }
+
+        public void CreateNewScriptFile(string file)
+        {
+            string currentDirectory = Directory.GetCurrentDirectory();
+            var pathToScriptFile = Path.Combine(currentDirectory, file);
+            if (!File.Exists(pathToScriptFile))
+            {
+                var scriptFileTemplate = ReadResourceFile("script.csx.template");
+                WriteFile(pathToScriptFile, scriptFileTemplate);
             }
         }
 
