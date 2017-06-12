@@ -38,6 +38,8 @@
                 var omniSharpFileTemplate = ReadResourceFile("omnisharp.json.template");
                 WriteFile(pathToOmniSharpJson, omniSharpFileTemplate);
             }
+
+            CreateNewScriptFile("helloworld.csx");
         }
 
         public void CreateNewScriptFile(string file)

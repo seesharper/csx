@@ -15,7 +15,7 @@
             cli.HelpOption("-? | -h | --help");
             
                        
-            cli.Command("vscode", config =>
+            cli.Command("init", config =>
             {
                 config.Description = "Creates the launch.json file and the tasks.json file needed to launch and debug the script.";                
                 config.OnExecute(() =>
