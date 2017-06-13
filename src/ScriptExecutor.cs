@@ -8,6 +8,7 @@
     using System.Threading;
     using Dotnet.Script.NuGetMetadataResolver;
     using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Scripting;
     using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
     using Microsoft.CodeAnalysis.Scripting;
@@ -27,9 +28,9 @@
             this.logger = loggerFactory.CreateLogger<ScriptExecutor>();
         }
 
-        public void Execute(string pathToScript)
+        public void Execute(string pathToScript, string[] args)
         {
-            var interactiveAssemblyLoader = new InteractiveAssemblyLoader();
+            
             if (!Path.IsPathRooted(pathToScript))
             {
                 pathToScript = Path.GetFullPath(pathToScript);
@@ -43,27 +44,32 @@
             }
 
             var scriptOptions = CreateScriptOptions(pathToScript);
-
-
-            var globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
-            //foreach (var arg in args)
-            //{
-            //    globals.Args.Add(arg);
-            //}
-
+            
+            var globals = new CommandLineScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+            foreach (var arg in args)
+            {
+                globals.Args.Add(arg);
+            }
 
             logger.LogInformation("Creating script");
-            var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(InteractiveScriptGlobals), interactiveAssemblyLoader);
+            var interactiveAssemblyLoader = new InteractiveAssemblyLoader();
+            var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(CommandLineScriptGlobals), interactiveAssemblyLoader);
 
             var diagnostics = script.GetCompilation().GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error);
             foreach (var diagnostic in diagnostics)
             {
                 logger.LogError(diagnostic.ToString());
             }
+
+            RunScript(script, globals);                        
+        }
+
+        private void RunScript(Script<object> script, CommandLineScriptGlobals globals)
+        {
             try
             {
                 logger.LogInformation("Executing script");
-                var result = script.RunAsync(globals, CancellationToken.None).Result;
+                script.RunAsync(globals, CancellationToken.None).Wait();
             }
             catch (AggregateException e)
             {
@@ -71,7 +77,7 @@
                 {
                     logger.LogError(innerException.ToString());
                 }
-            }                        
+            }
         }
 
 

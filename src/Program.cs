@@ -10,7 +10,7 @@
     {
         static void Main(string[] args)
         {            
-            var cli = new CommandLineApplication();
+            var cli = new CommandLineApplication(false);
             cli.Description = "C# script runner for .Net Core with debug and NuGetCommand support";
             cli.HelpOption("-? | -h | --help");
             var debugOption = cli.Option("-d | --debug", "Outputs debug messages to the console", CommandOptionType.NoValue);
@@ -54,7 +54,7 @@
                     return 0;
                 }                
                 var scriptExecutor = CreateScriptExecutor(debugOption.HasValue());
-                scriptExecutor.Execute(file.Value);                
+                scriptExecutor.Execute(file.Value, cli.RemainingArguments.ToArray());                
                 return 0;
             });
            
