@@ -2,7 +2,7 @@
   "profiles": {
     "csx": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Github\\csx\\src\\samplescript.csx"
+      "commandLineArgs": "init"
     }
   }
 }
