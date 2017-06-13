@@ -5,7 +5,7 @@ A super simple C# script runner for .Net Core with debug and NuGet support.
 ### Installing 
 
 ```shell
-choco install csx --source https://www.nuget.org/api/v2 --pre	
+choco install csx --source https://www.nuget.org/api/v2
 ```
 
 ### Visual Studio Code 
@@ -40,15 +40,35 @@ Create a new folder somewhere and from within that folder issue the following co
 csx init
 ```
 
-Running the script is as simple as 
+This command creates 4 files
+
+| Name                |                                          |
+| ------------------- | ---------------------------------------- |
+| .vscode/tasks.json  | Enables the script to be executed within VS Code. |
+| .vscode/launch.json | Configures script debugging              |
+| omnisharp.json      | Enables NuGet references in scripts (Intellisense) |
+| helloworld.csx      | A minimal script that outputs "Hello world!" to the console. |
+
+> Note: Only the actual script file is needed for script execution. Other files are just for VS Code awesomeness. 
+
+
+
+### Running the script
+
+#### Command Line
 
 ```shell
 csx helloworld.csx
+Hello world!
 ```
 
-### Debugging 
+#### VS Code
 
-Simply open the folder containing the script in VS Code, set a breakpoint and hit F5.
+Ctrl+Shift+B or "Debug->Start Without Debugging "
+
+### Debugging
+
+Set a breakpoint anywhere in your code and hit F5
 
 ### NuGet 
 
