@@ -10,10 +10,10 @@
     {
         static void Main(string[] args)
         {            
-            var cli = new CommandLineApplication();
+            var cli = new CommandLineApplication(false);
             cli.Description = "C# script runner for .Net Core with debug and NuGetCommand support";
             cli.HelpOption("-? | -h | --help");
-            
+            var debugOption = cli.Option("-d | --debug", "Outputs debug messages to the console", CommandOptionType.NoValue);
                        
             cli.Command("init", config =>
             {
@@ -52,9 +52,9 @@
                 {
                     cli.ShowHelp();
                     return 0;
-                }
-                var scriptExecutor = CreateScriptExecutor();
-                scriptExecutor.Execute(file.Value);                
+                }                
+                var scriptExecutor = CreateScriptExecutor(debugOption.HasValue());
+                scriptExecutor.Execute(file.Value, cli.RemainingArguments.ToArray());                
                 return 0;
             });
            
@@ -62,12 +62,12 @@
             cli.Execute(args);
         }
 
-        private static ScriptExecutor CreateScriptExecutor()
+        private static ScriptExecutor CreateScriptExecutor(bool debug)
         {
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddProvider(
                 new ConsoleLoggerProvider(
-                    (text, logLevel) => logLevel >= LogLevel.Information, true));
+                    (text, logLevel) => logLevel >= (debug ? LogLevel.Debug : LogLevel.Warning), true));
             return new ScriptExecutor(ScriptProjectProvider.Create(loggerFactory),loggerFactory);
 
         }

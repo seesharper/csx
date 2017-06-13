@@ -16,6 +16,6 @@
   </metadata>
   <files>
     <file src="tmp\bin\Release\netcoreapp1.1\win7-x64\publish\**\*.*" target="csx\"/>
-    <!--<file src="..\src\NuGet\NuGet350.exe" target="csx\"/>     -->
+    <file src="..\src\NuGet\NuGet350.exe" target="csx\"/>     
   </files>
 </package>
