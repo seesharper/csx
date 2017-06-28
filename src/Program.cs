@@ -1,6 +1,8 @@
-﻿namespace csx
+﻿using System;
+using System.Runtime.Loader;
+
+namespace csx
 {
-    using Dotnet.Script.NuGetMetadataResolver;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Console;
     using Microsoft.Extensions.CommandLineUtils;
@@ -64,12 +66,19 @@
 
         private static ScriptExecutor CreateScriptExecutor(bool debug)
         {
+        
+
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddProvider(
                 new ConsoleLoggerProvider(
                     (text, logLevel) => logLevel >= (debug ? LogLevel.Debug : LogLevel.Warning), true));
-            return new ScriptExecutor(ScriptProjectProvider.Create(loggerFactory),loggerFactory);
+            var scriptParser = new ScriptParser(loggerFactory);
+            var scriptProjectProvider = new ScriptProjectProvider(scriptParser, loggerFactory);
+            var runtimeDependencyResolver = new RuntimeDependencyResolver(new CommandRunner(loggerFactory), loggerFactory);
+            return new ScriptExecutor(scriptProjectProvider, runtimeDependencyResolver, loggerFactory);
 
         }
+
+        
     }  
 }

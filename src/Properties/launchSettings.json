@@ -2,7 +2,7 @@
   "profiles": {
     "csx": {
       "commandName": "Project",
-      "commandLineArgs": "samplescript.csx -d test"
+      "commandLineArgs": "samplescript.csx -d"
     }
   }
 }
