@@ -75,6 +75,6 @@ Set a breakpoint anywhere in your code and hit F5
 In addition to referencing other scripts using the #load directive we can also reference NuGet packages.
 
 ```csharp
-#r "nuget:AutoMapper/6.0.0"
+#r "nuget:AutoMapper,6.0.0"
 ```
 
