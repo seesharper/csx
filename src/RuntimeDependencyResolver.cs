@@ -18,7 +18,7 @@ namespace csx
     public class RuntimeDependencyResolver : IRuntimeDependencyResolver
     {
         private readonly ICommandRunner _commandRunner;
-        
+
         private readonly ILogger _logger;
 
         // Note: Windows only, Mac and Linux needs something else?
@@ -51,56 +51,51 @@ namespace csx
             var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
             var runtimeDepedencies = new HashSet<RuntimeDependency>();
 
+            var context = ReadDependencyContext(pathToProjectFile);
 
-            var pathToAssetsFiles = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
-            using (FileStream fs = new FileStream(pathToAssetsFiles, FileMode.Open, FileAccess.Read))
+            //Note: Scripting only releates to runtime libraries.
+            var runtimeLibraries = context.RuntimeLibraries;
+
+            foreach (var runtimeLibrary in runtimeLibraries)
             {
-                using (var reader = new DependencyContextJsonReader())
+                ProcessNativeLibraries(runtimeLibrary, pathToGlobalPackagesFolder);
+                ProcessRuntimeAssemblies(runtimeLibrary, pathToGlobalPackagesFolder, runtimeDepedencies);
+            }
+
+            return runtimeDepedencies;
+        }
+
+        private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary, string pathToGlobalPackagesFolder,
+            HashSet<RuntimeDependency> runtimeDepedencies)
+        {
+            
+            foreach (var runtimeAssemblyGroup in runtimeLibrary.RuntimeAssemblyGroups.Where(rag => IsRelevantForCurrentRuntime(rag.Runtime)))
+            {
+                foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
                 {
-                    var context = reader.Read(fs);
-                    var runtimeLibraries = context.RuntimeLibraries;
-                                        
-                    foreach (var runtimeLibrary in runtimeLibraries)
+                    var path = Path.Combine(runtimeLibrary.Path, assetPath);
+                    if (!path.EndsWith("_._"))
                     {
-                        if (runtimeLibrary.NativeLibraryGroups.Count > 0)
-                        {                            
-                            foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups)
-                            {                                
-                                var fullPath = Path.Combine(pathToGlobalPackagesFolder, runtimeLibrary.Path, nativeLibraryGroup.AssetPaths[0]);
-                                Console.WriteLine(fullPath);
-                                _logger.LogInformation(fullPath);
-                                LoadLibrary(fullPath);            
-                            }
-                        }
-
-                        
-
-
-                        if (runtimeLibrary.RuntimeAssemblyGroups.Count > 0)
-                        {
-                            var path = runtimeLibrary.Path;
-                            foreach (var runtimeLibraryRuntimeAssemblyGroup in runtimeLibrary.RuntimeAssemblyGroups)
-                            {
-                                if (runtimeLibraryRuntimeAssemblyGroup.Runtime == "win" ||
-                                    runtimeLibraryRuntimeAssemblyGroup.Runtime == "")
-                                {
-                                    path = Path.Combine(path, runtimeLibraryRuntimeAssemblyGroup.AssetPaths[0]);
-                                    if (!path.EndsWith("_._"))
-                                    {
-                                        var fullPath = Path.Combine(pathToGlobalPackagesFolder, path);
-                                        Console.WriteLine(fullPath);
-                                        _logger.LogInformation(fullPath);
-                                        runtimeDepedencies.Add(new RuntimeDependency(runtimeLibrary.Name, fullPath));
-                                    }
-
-                                }
-                            }
-                        }
+                        var fullPath = Path.Combine(pathToGlobalPackagesFolder, path);
+                        _logger.LogInformation(fullPath);
+                        runtimeDepedencies.Add(new RuntimeDependency(runtimeLibrary.Name, fullPath));
                     }
-
                 }
             }
-            return runtimeDepedencies;
+        }
+
+        private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string pathToGlobalPackagesFolder)
+        {            
+            foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(nlg => IsRelevantForCurrentRuntime(nlg.Runtime)))
+            {
+                foreach (var assetPath in nativeLibraryGroup.AssetPaths)
+                {
+                    var fullPath = Path.Combine(pathToGlobalPackagesFolder, runtimeLibrary.Path,
+                        assetPath);
+                    _logger.LogInformation($"Loading native library from {fullPath}");
+                    LoadLibrary(fullPath);
+                }                
+            }            
         }
 
         private void Restore(string pathToProjectFile)
@@ -115,6 +110,18 @@ namespace csx
             return match.Groups[1].Captures[0].ToString();
         }
 
+        public bool IsRelevantForCurrentRuntime(string runtime)
+        {
+            return string.IsNullOrWhiteSpace(runtime) || runtime == GetRuntimeIdentitifer();
+        }
+
+        private static string GetRuntimeIdentitifer()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "unix";
+
+            return "win";
+        }
     }
 
     public class RuntimeDependency

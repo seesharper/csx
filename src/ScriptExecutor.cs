@@ -145,14 +145,5 @@ namespace csx
             }
             return null;
         }
-
-        private static string GetRuntimeIdentitifer()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "unix";
-
-            return "win";
-        }
-
     }   
 }
