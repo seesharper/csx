@@ -66,12 +66,20 @@ namespace csx
             var script = CSharpScript.Create(codeAsPlainText, scriptOptions, typeof(CommandLineScriptGlobals),
                 interactiveAssemblyLoader);
                                                                         
-            var diagnostics = script.GetCompilation().GetDiagnostics()
+            var warnings = script.GetCompilation().GetDiagnostics()
                 .Where(d => d.Severity == DiagnosticSeverity.Warning);
-            foreach (var diagnostic in diagnostics)
+            foreach (var warning in warnings)
             {                
-                logger.LogError(diagnostic.ToString());
+                logger.LogWarning(warning.ToString());
             }
+
+            var errors = script.GetCompilation().GetDiagnostics()
+                .Where(d => d.Severity == DiagnosticSeverity.Warning);
+            foreach (var error in errors)
+            {
+                logger.LogWarning(error.ToString());
+            }
+
 
             RunScript(script, globals);
         }
