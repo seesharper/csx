@@ -74,10 +74,10 @@ namespace csx
             }
 
             var errors = script.GetCompilation().GetDiagnostics()
-                .Where(d => d.Severity == DiagnosticSeverity.Warning);
+                .Where(d => d.Severity == DiagnosticSeverity.Error);
             foreach (var error in errors)
             {
-                logger.LogWarning(error.ToString());
+                logger.LogError(error.ToString());
             }
 
 

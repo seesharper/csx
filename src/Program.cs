@@ -71,7 +71,7 @@ namespace csx
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddProvider(
                 new ConsoleLoggerProvider(
-                    (text, logLevel) => logLevel >= (debug ? LogLevel.Debug : LogLevel.Warning), true));
+                    (text, logLevel) => logLevel >= (debug ? LogLevel.Debug : LogLevel.Error), true));
             var scriptParser = new ScriptParser(loggerFactory);
             var scriptProjectProvider = new ScriptProjectProvider(scriptParser, loggerFactory);
             var runtimeDependencyResolver = new RuntimeDependencyResolver(new CommandRunner(loggerFactory), loggerFactory);
