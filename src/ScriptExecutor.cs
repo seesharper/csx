@@ -88,19 +88,13 @@ namespace csx
 
 
         private void RunScript(Script<object> script, CommandLineScriptGlobals globals)
-        {                        
-            try
+        {
+            var scriptState = script.RunAsync(globals, exception => true).Result;
+            if (scriptState.Exception != null)
             {
-                logger.LogInformation("Executing script");
-                script.RunAsync(globals, CancellationToken.None).Wait();
-            }
-            catch (AggregateException e)
-            {
-                foreach (var innerException in e.InnerExceptions)
-                {
-                    logger.LogError(innerException.ToString());
-                }
-            }
+                logger.LogError(scriptState.Exception.ToString());
+                throw scriptState.Exception;
+            }           
         }
 
        

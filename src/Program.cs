@@ -10,9 +10,9 @@ namespace csx
 
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {            
-            var cli = new CommandLineApplication(false);
+            var cli = new CommandLineApplication(false);            
             cli.Description = "C# script runner for .Net Core with debug and NuGetCommand support";
             cli.HelpOption("-? | -h | --help");
             var debugOption = cli.Option("-d | --debug", "Outputs debug messages to the console", CommandOptionType.NoValue);
@@ -56,12 +56,19 @@ namespace csx
                     return 0;
                 }                
                 var scriptExecutor = CreateScriptExecutor(debugOption.HasValue());
-                scriptExecutor.Execute(file.Value, cli.RemainingArguments.ToArray());                
+                try
+                {
+                    scriptExecutor.Execute(file.Value, cli.RemainingArguments.ToArray());
+                }
+                catch (Exception)
+                {
+                    return -1;
+                }
                 return 0;
             });
            
 
-            cli.Execute(args);
+            return cli.Execute(args);
         }
 
         private static ScriptExecutor CreateScriptExecutor(bool debug)

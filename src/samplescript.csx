@@ -8,7 +8,8 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 
-
+// throw new Exception();
+return;
 public class TempContext : DbContext
 {
     public DbSet<Log> Logs { get; set; }
